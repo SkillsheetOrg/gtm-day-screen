@@ -45,6 +45,9 @@ h1.big{font-size:104px;line-height:1.2}
 .hostgrid img{height:56px;width:auto;align-self:flex-start}
 .hostgrid .bg{font-family:"Goldtyne Soft Light",Georgia,serif;font-size:52px;line-height:1.3;margin:0}
 .hostgrid p{font-size:30px;line-height:1.4;color:var(--muted);margin:0}
+.handles{display:grid;grid-template-columns:2fr 1fr 1fr;gap:28px;margin-top:44px}
+.handles>div{background:var(--raised);border-radius:10px;padding:28px}
+.handles .v{font-size:30px;font-weight:600;margin-top:8px;color:var(--ink)}
 #ctl{position:fixed;right:16px;bottom:16px;display:flex;gap:8px;opacity:0;transition:opacity .3s;font:600 14px Inter,sans-serif}
 body.show #ctl{opacity:1}
 #ctl button{background:var(--raised);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font:inherit;cursor:pointer}
@@ -98,13 +101,15 @@ function sessionCard(s){
  const grid=n?`<div class="people" style="grid-template-columns:repeat(${cols},1fr)">${s.people.map(p=>person(p,col,qs)).join("")}</div>`:"";
  return `<div class="eye">${esc(s.time)}</div><h1>${esc(s.title)}</h1>${grid}`}
 
+// Blurb, CTA and handles from Cesar Vasquez (SecureAuth CMO), email 2026-10-23
+const sp=()=>`<div class="eye">Thank you to our title sponsor</div><img src="assets/sp_secureauth.png" alt="SecureAuth" style="height:110px;margin-top:20px"><p class="lede" style="color:var(--ink)">SecureAuth is an enterprise identity security company protecting every identity: employees, customers, partners, and AI agents. SecureAuth Agent Authority provides continuous, transaction-level authorization for AI agents and non-human identities.</p><p class="lede">See Agent Authority in action at secureauth.com/free-trial/agent-authority</p><div class="handles"><div><div class="r">LINKEDIN</div><div class="v">linkedin.com/company/secureauth-corporation</div></div><div><div class="r">X</div><div class="v">@SecureAuth</div></div><div><div class="r">INSTAGRAM</div><div class="v">@SecureAuth</div></div></div>`;
 function build(){
  const m=nowMin(),deck=[],reel=[];
  deck.push(()=>`<div class="eye">Today at AI Days</div><h1 class="big">AI GTM Day</h1><div class="agenda">${SESS.map(s=>`<div class="tm ${m>=s.start&&m<s.end?"now":""}">${esc(s.time)}</div><div>${esc(s.title)}</div>`).join("")}</div>`);
- SESS.filter(s=>s.people.length).forEach(s=>deck.push(()=>sessionCard(s)));
+ SESS.filter(s=>s.people.length).forEach(s=>{deck.push(sp);deck.push(()=>sessionCard(s))});
  const hh=()=>`<div class="eye">3:00–5:00 PM · downstairs</div><h1 class="big">AI GTM Day Happy Hour &amp; Startup Showcase</h1><p class="lede">Meet today’s ${STARTUPS.length} startups, grab a drink, and find the people you came to meet.</p>`;
- deck.push(hh);
- reel.push(()=>`<div class="eye">Thank you to our title sponsor</div><img src="assets/sp_secureauth.png" alt="SecureAuth" style="height:110px;margin-top:20px"><p class="lede" style="color:var(--ink)">SecureAuth is an enterprise identity security company protecting every identity: employees, customers, partners, and AI agents.</p><p class="lede">See Agent Authority in action at secureauth.com/free-trial/agent-authority</p>`);
+ deck.push(sp);deck.push(hh);
+ reel.push(sp);
  reel.push(hh);
  const half=Math.ceil(STARTUPS.length/2),st=s=>()=>`<div class="eye">At the Startup Showcase today · 3–5 PM</div><div class="startup"><div class="tile${s[4]?" dark":""}"><img src="assets/${s[3]}" alt="${esc(s[0])} logo"></div><div><h2>${esc(s[0])}</h2><p class="one">${esc(s[1])}</p><p class="site">${esc(s[2])}</p></div></div>`;
  STARTUPS.slice(0,half).forEach(s=>reel.push(st(s)));
