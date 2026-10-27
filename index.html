@@ -92,7 +92,7 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 const pt=()=>{const p=new Intl.DateTimeFormat("en-CA",{timeZone:"America/Los_Angeles",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).formatToParts(new Date());const g=t=>p.find(x=>x.type===t).value;return{date:`${g("year")}-${g("month")}-${g("day")}`,min:+g("hour")*60+ +g("minute")}};
 const nowMin=()=>{const n=pt();return n.date===DAY?n.min:(n.date<DAY?-1:9999)};
 
-function person(p,col,qs){return `<div class="p${col?" col":""}"><div class="q" style="width:${qs}px;height:${qs}px">${QR[p[0]]}</div><div><div class="r">${p[1]}</div><div class="n">${esc(p[2])}</div><div class="t">${esc(p[3])}</div><div class="s">Scan to connect</div></div></div>`}
+function person(p,col,qs){return `<div class="p${col?" col":""}"><div class="q" style="width:${qs}px;height:${qs}px">${QR[p[0]]}</div><div><div class="r">${p[1]}</div><div class="n">${esc(p[2])}</div><div class="t">${esc(p[3])}</div></div></div>`}
 function sessionCard(s){
  const n=s.people.length,col=n>2,cols=n>2?n:2,qs=n>4?250:n>2?240:300;
  const grid=n?`<div class="people" style="grid-template-columns:repeat(${cols},1fr)">${s.people.map(p=>person(p,col,qs)).join("")}</div>`:"";
