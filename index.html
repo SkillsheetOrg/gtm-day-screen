@@ -48,11 +48,16 @@ h1.big{font-size:104px;line-height:1.2}
 .handles{display:grid;grid-template-columns:2fr 1fr 1fr;gap:28px;margin-top:44px}
 .handles>div{background:var(--raised);border-radius:10px;padding:28px}
 .handles .v{font-size:30px;font-weight:600;margin-top:8px;color:var(--ink)}
+#bgimg{position:absolute;inset:0;width:1920px;height:1080px;object-fit:cover;opacity:0;transition:opacity .5s}
+#stage.talk #bgimg{opacity:1}
+#stage.talk .bar,#stage.talk #prog{visibility:hidden}
+.talklogo{position:absolute;left:0;right:0;top:-110px;display:flex;justify-content:center}
 #ctl{position:fixed;right:16px;bottom:16px;display:flex;gap:8px;opacity:0;transition:opacity .3s;font:600 14px Inter,sans-serif}
 body.show #ctl{opacity:1}
 #ctl button{background:var(--raised);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font:inherit;cursor:pointer}
 </style></head><body>
 <div id="stage">
+<img id="bgimg" src="assets/bg_talk.jpg" alt="">
 <div id="prog"></div>
 <div class="bar"><div class="g"><img src="assets/sp_thinkspace.png" alt="Thinkspace" style="height:50px"><img src="assets/sp_trnout.png" alt="trnout." style="height:42px"></div>
 <div class="g"><span>Sponsored by</span><img src="assets/sp_secureauth.png" alt="SecureAuth" style="height:50px"></div></div>
@@ -103,11 +108,14 @@ function sessionCard(s){
  return `<div class="eye">${esc(s.time)}</div><h1>${esc(s.title)}</h1>${grid}`}
 
 // Blurb, CTA and handles from Cesar Vasquez (SecureAuth CMO), email 2026-10-23
+// Talk background: slide 2 of the AI Week slides deck (Google Slides 1GguMbbp...), SecureAuth logo top center
+const TALK=()=>`<div class="talklogo"><img src="assets/sp_secureauth.png" alt="SecureAuth" style="height:84px"></div>`;
 const sp=()=>`<div class="eye">Thank you to our title sponsor</div><img src="assets/sp_secureauth.png" alt="SecureAuth" style="height:110px;margin-top:20px"><p class="lede" style="color:var(--ink)">SecureAuth is an enterprise identity security company protecting every identity: employees, customers, partners, and AI agents. SecureAuth Agent Authority provides continuous, transaction-level authorization for AI agents and non-human identities.</p><p class="lede">See Agent Authority in action at secureauth.com/free-trial/agent-authority</p><div class="handles"><div><div class="r">LINKEDIN</div><div class="v">linkedin.com/company/secureauth-corporation</div></div><div><div class="r">X</div><div class="v">@SecureAuth</div></div><div><div class="r">INSTAGRAM</div><div class="v">@SecureAuth</div></div></div>`;
 function build(){
  const m=nowMin(),deck=[],reel=[];
  deck.push(()=>`<div class="eye">Today at AI Days</div><h1 class="big">AI GTM Day</h1><div class="agenda">${SESS.map(s=>`<div class="tm ${m>=s.start&&m<s.end?"now":""}">${esc(s.time)}</div><div>${esc(s.title)}</div>`).join("")}</div>`);
- SESS.filter(s=>s.people.length).forEach(s=>{deck.push(sp);deck.push(()=>sessionCard(s))});
+ // Per session: sponsor, speakers + QR, talk background, speakers + QR again
+ SESS.filter(s=>s.people.length).forEach(s=>{const c=()=>sessionCard(s);deck.push(sp,c,TALK,c)});
  const hh=()=>`<div class="eye">3:00–5:00 PM · downstairs</div><h1 class="big">AI GTM Day Happy Hour &amp; Startup Showcase</h1><p class="lede">Meet today’s ${STARTUPS.length} startups, grab a drink, and find the people you came to meet.</p>`;
  deck.push(sp);deck.push(hh);
  reel.push(sp);
@@ -121,8 +129,8 @@ function build(){
 // Deck mode: manual only (arrows / clicker). Reel mode (R): loops the reel cards every 10s until R or Esc.
 let C=build(),mode="deck",di=0,ri=0,timer,started=0;
 const list=()=>C[mode],idx=()=>mode==="deck"?di:ri;
-function render(){const slot=document.getElementById("slot"),old=slot.firstElementChild;if(old){old.classList.add("out");setTimeout(()=>old.remove(),500)}
- const el=document.createElement("div");el.className="card";el.innerHTML=list()[idx()]();slot.appendChild(el);started=performance.now()}
+function render(){const slot=document.getElementById("slot"),olds=[...slot.children];olds.forEach(o=>{if(!o.classList.contains("out")){o.classList.add("out");setTimeout(()=>o.remove(),500)}});
+ const el=document.createElement("div");el.className="card";const f=list()[idx()];el.innerHTML=f();document.getElementById("stage").classList.toggle("talk",f===TALK);slot.appendChild(el);started=performance.now()}
 function go(n){clearTimeout(timer);C=build();const L=list().length;n=mode==="deck"?Math.max(0,Math.min(L-1,n)):(n+L)%L;mode==="deck"?di=n:ri=n;render();
  if(mode==="reel")timer=setTimeout(()=>go(ri+1),DUR);document.getElementById("reelb").textContent=mode==="reel"?"Stop reel":"Reel"}
 function setMode(m){mode=m;go(idx())}
