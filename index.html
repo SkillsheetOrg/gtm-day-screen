@@ -147,7 +147,12 @@ addEventListener("keydown",e=>{const k=e.key;
  else if(k==="Escape"&&mode==="reel")setMode("deck");
  else if(k.toLowerCase()==="f")fs()});
 let ht;addEventListener("mousemove",()=>{document.body.classList.add("show");clearTimeout(ht);ht=setTimeout(()=>document.body.classList.remove("show"),2500)});
-try{navigator.wakeLock?.request("screen").catch(()=>{})}catch(_){}
+// Keep the display awake (no screensaver or sleep). The browser drops the lock when the tab is hidden, on some
+// fullscreen switches and after sleep, so re-request it on every one of those plus any click or key.
+let wl=null;
+async function wake(){try{if(document.visibilityState==="visible"&&(!wl||wl.released))wl=await navigator.wakeLock.request("screen")}catch(_){}}
+["visibilitychange","fullscreenchange","webkitfullscreenchange","click","keydown","pointerdown"].forEach(e=>(e.includes("visib")||e.includes("full")?document:window).addEventListener(e,wake));
+setInterval(wake,30000);wake();
 (document.fonts?.ready||Promise.resolve()).then(()=>{go(0);requestAnimationFrame(tick)});
 })();
 </script></body></html>
